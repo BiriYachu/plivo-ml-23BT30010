@@ -1,0 +1,5 @@
+__pycache__/
+.ipynb_checkpoints/
+run*_ckpt.pt
+new_ckpt.pt
+test.pt

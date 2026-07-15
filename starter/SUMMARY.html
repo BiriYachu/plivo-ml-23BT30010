@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Speedrun Summary</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0f12;
+            --card-bg: rgba(25, 30, 40, 0.65);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary-accent: #3b82f6;
+            --success-accent: #10b981;
+            --text-color: #e2e8f0;
+            --text-dim: #94a3b8;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+        }
+        header {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            padding: 40px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+            text-align: center;
+        }
+        h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 300;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        .card-val {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success-accent);
+            margin-bottom: 5px;
+        }
+        .card-lbl {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-accent);
+            padding-left: 12px;
+            letter-spacing: -0.03em;
+        }
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            text-align: left;
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        td {
+            font-size: 0.95rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-baseline { background-color: rgba(148, 163, 184, 0.15); color: #94a3b8; }
+        .badge-better { background-color: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .badge-best { background-color: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .badge-revert { background-color: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+        li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>2000-Step LLM Speedrun Summary</h1>
+            <div class="subtitle">Mediocre GPT Baseline optimized under a strict Step and Parameter budget</div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-val" style="color: #94a3b8;">2.3718</div>
+                <div class="card-lbl">Baseline Dev BPB</div>
+            </div>
+            <div class="card">
+                <div class="card-val">1.8292</div>
+                <div class="card-lbl">Final Dev BPB</div>
+            </div>
+            <div class="card">
+                <div class="card-val" style="color: #3b82f6;">1,976,448</div>
+                <div class="card-lbl">Total Parameters</div>
+            </div>
+            <div class="card">
+                <div class="card-val" style="color: #3b82f6;">2,000</div>
+                <div class="card-lbl">Optimizer Steps</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Final Optimized Architecture & Hyperparameters</h2>
+            <table>
+                <tr>
+                    <td><strong>Tokenizer</strong></td>
+                    <td>BPE (trained on training corpus), Vocab Size: 1024 (2.19x sequence compression)</td>
+                </tr>
+                <tr>
+                    <td><strong>Embedding Size (n_embd)</strong></td>
+                    <td>192 (reinvested savings from weight tying and RoPE)</td>
+                </tr>
+                <tr>
+                    <td><strong>Attention Heads (n_head)</strong></td>
+                    <td>6 (head dimension: 32)</td>
+                </tr>
+                <tr>
+                    <td><strong>Layers (n_layer)</strong></td>
+                    <td>4 transformer blocks</td>
+                </tr>
+                <tr>
+                    <td><strong>Context Length (block_size)</strong></td>
+                    <td>256 tokens (doubling seen tokens per step to 2,048)</td>
+                </tr>
+                <tr>
+                    <td><strong>Weight Tying</strong></td>
+                    <td>Enabled (tied token embeddings and head projection)</td>
+                </tr>
+                <tr>
+                    <td><strong>Positional Embeddings</strong></td>
+                    <td>Rotary Position Embeddings (RoPE)</td>
+                </tr>
+                <tr>
+                    <td><strong>Optimizer</strong></td>
+                    <td>AdamW (lr=1e-3, betas=(0.9, 0.95), weight_decay=0.1, clip_grad=1.0)</td>
+                </tr>
+                <tr>
+                    <td><strong>Learning Rate Schedule</strong></td>
+                    <td>Linear warmup (200 steps) + Cosine Decay to 1e-4</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Controlled Experiment History</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Run</th>
+                        <th>Change Description</th>
+                        <th>Parameters</th>
+                        <th>Dev BPB</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Baseline configuration as-is</td>
+                        <td>1,339,840</td>
+                        <td>2.3718</td>
+                        <td><span class="badge badge-baseline">Baseline</span></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Introduce 1024-vocab BPE tokenizer</td>
+                        <td>1,585,600</td>
+                        <td>2.2329</td>
+                        <td><span class="badge badge-better">Kept</span></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Enable Weight Tying</td>
+                        <td>1,421,760</td>
+                        <td>2.2575</td>
+                        <td><span class="badge badge-better">Kept</span></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>AdamW + Warmup & Cosine LR schedule + Grad clip</td>
+                        <td>1,421,760</td>
+                        <td>2.1630</td>
+                        <td><span class="badge badge-better">Kept</span></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>RMSNorm + std=0.02 scaled initialization</td>
+                        <td>1,420,320</td>
+                        <td>2.2322</td>
+                        <td><span class="badge badge-revert">Reverted</span></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Rotary Position Embeddings (RoPE)</td>
+                        <td>1,401,280</td>
+                        <td>1.9499</td>
+                        <td><span class="badge badge-better">Kept</span></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Wider model: n_embd=192, n_head=6</td>
+                        <td>1,976,448</td>
+                        <td>1.9219</td>
+                        <td><span class="badge badge-better">Kept</span></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Longer context: block_size=256</td>
+                        <td>1,976,448</td>
+                        <td><strong>1.8292</strong></td>
+                        <td><span class="badge badge-best">Best</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>Why This Configuration Works</h2>
+            <ul>
+                <li><strong>Sequence Compression:</strong> By training a BPE tokenizer specifically on the target train corpus, the model represents complex Devanagari (Hindi) characters in single tokens instead of 3 raw bytes, achieving a 2.19x compression. This doubles the amount of text visible to the attention layers in any block window.</li>
+                <li><strong>Parameter Reinvestment:</strong> Enabling weight tying and replacing learned absolute positional embeddings with mathematical RoPE saved over 184K parameters. This allowed us to expand the model's width to 192 (from 160) without violating the 2M param cap, heavily improving representational capacity.</li>
+                <li><strong>Optimal Optimization:</strong> Warmup prevents initial gradient explosion, cosine decay schedules stable local minima convergence, and AdamW weight decay prevents overfitting on the small corpus.</li>
+                <li><strong>Context Length Scaling:</strong> Increasing the context window to 256 allows the attention mechanism to capture twice as much contextual context and doubles the data density trained per optimization step.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Work Breakdown (Human vs. Agent)</h2>
+            <ul>
+                <li><strong>Human-Directed / Decided:</strong> Provided the initial problem specifications, unzipped starter package, and gave the prompt instructions and proceed signals.</li>
+                <li><strong>Agent-Generated / Executed (100% Autonomous):</strong>
+                    <ul>
+                        <li>Researched the starter code end-to-end to identify architectural flaws.</li>
+                        <li>Implemented an optimized BPE training pipeline (with tuple membership-check shortcuts running in seconds).</li>
+                        <li>Refined the PyTorch network architecture to support Rotary Embeddings, LayerNorm weight tying, and parameter capacity scaling.</li>
+                        <li>Wrote clean training scripts containing linear-warmup/cosine decay scheduling and gradient clipping.</li>
+                        <li>Conducted 8 systematic, controlled experiment runs, diagnosed regressions, and documented the results.</li>
+                        <li>Coded and verified the final deliverables conforming to strict code style rules (zero comments in source files).</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
