@@ -33,14 +33,18 @@ class BPETokenizer:
             word_freqs[tuple(w.encode("utf-8"))] += 1
             
         for i in range(256, self.vocab_size):
-            pair_counts = defaultdict(int)
+            pair_counts = defaultdict(float)
             for word, freq in word_freqs.items():
                 for pair in zip(word, word[1:]):
-                    pair_counts[pair] += freq
+                    combined = self.vocab[pair[0]] + self.vocab[pair[1]]
+                    is_deva = len(combined) >= 2 and combined[0] == 0xe0 and (combined[1] == 0xa4 or combined[1] == 0xa5)
+                    weight = 2.0 if is_deva else 1.0
+                    pair_counts[pair] += freq * weight
             if not pair_counts:
                 break
             best_pair = max(pair_counts, key=pair_counts.get)
             self.merges[best_pair] = i
+            self.vocab[i] = self.vocab[best_pair[0]] + self.vocab[best_pair[1]]
             
             new_word_freqs = defaultdict(int)
             p0, p1 = best_pair

@@ -146,7 +146,7 @@
                 <div class="card-lbl">Baseline Dev BPB</div>
             </div>
             <div class="card">
-                <div class="card-val">1.8292</div>
+                <div class="card-val">1.8199</div>
                 <div class="card-lbl">Final Dev BPB</div>
             </div>
             <div class="card">
@@ -164,7 +164,7 @@
             <table>
                 <tr>
                     <td><strong>Tokenizer</strong></td>
-                    <td>BPE (trained on training corpus), Vocab Size: 1024 (2.19x sequence compression)</td>
+                    <td>BPE with Devanagari priority rules, Vocab Size: 1024 (2.24x sequence compression)</td>
                 </tr>
                 <tr>
                     <td><strong>Embedding Size (n_embd)</strong></td>
@@ -244,7 +244,7 @@
                     </tr>
                     <tr>
                         <td>5</td>
-                        <td>RMSNorm + std=0.02 scaled initialization</td>
+                        <td>RMSNorm + std=0.02 init scaling</td>
                         <td>1,420,320</td>
                         <td>2.2322</td>
                         <td><span class="badge badge-revert">Reverted</span></td>
@@ -267,7 +267,14 @@
                         <td>8</td>
                         <td>Longer context: block_size=256</td>
                         <td>1,976,448</td>
-                        <td><strong>1.8292</strong></td>
+                        <td>1.8292</td>
+                        <td><span class="badge badge-better">Kept</span></td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Custom Devanagari Merge Priority Tokenizer</td>
+                        <td>1,976,448</td>
+                        <td><strong>1.8199</strong></td>
                         <td><span class="badge badge-best">Best</span></td>
                     </tr>
                 </tbody>
@@ -277,25 +284,28 @@
         <div class="section">
             <h2>Why This Configuration Works</h2>
             <ul>
-                <li><strong>Sequence Compression:</strong> By training a BPE tokenizer specifically on the target train corpus, the model represents complex Devanagari (Hindi) characters in single tokens instead of 3 raw bytes, achieving a 2.19x compression. This doubles the amount of text visible to the attention layers in any block window.</li>
-                <li><strong>Parameter Reinvestment:</strong> Enabling weight tying and replacing learned absolute positional embeddings with mathematical RoPE saved over 184K parameters. This allowed us to expand the model's width to 192 (from 160) without violating the 2M param cap, heavily improving representational capacity.</li>
-                <li><strong>Optimal Optimization:</strong> Warmup prevents initial gradient explosion, cosine decay schedules stable local minima convergence, and AdamW weight decay prevents overfitting on the small corpus.</li>
-                <li><strong>Context Length Scaling:</strong> Increasing the context window to 256 allows the attention mechanism to capture twice as much contextual context and doubles the data density trained per optimization step.</li>
+                <li><strong>Devanagari Priority BPE:</strong> Hindi characters are represented in UTF-8 via combining marks (matras) and consonant clusters. By adding a 2.0x weight to Devanagari byte pairs, the BPE tokenizer merges Hindi script symbols first. This boosts sequence compression to 2.24x and yields much more coherent subword tokens, lowering dev BPB.</li>
+                <li><strong>Weight Tying & RoPE:</strong> Tying the token embeddings to the prediction head and removing learned absolute positional embeddings in favor of trigonometric Rotary Position Embeddings (RoPE) saved over 184K parameters. This allowed scaling the embedding dimensions to 192 under the 2M cap.</li>
+                <li><strong>Context Length Scaling:</strong> A block size of 256 tokens enables the model to see longer context patterns and doubles the data density trained per optimization step.</li>
+                <li><strong>Grad Clip + LR Warmup:</strong> warmups and gradient clipping stabilize SGD step dynamics, allowing the model to train smoothly under 2000 steps without gradient spikes.</li>
             </ul>
         </div>
 
         <div class="section">
             <h2>Work Breakdown (Human vs. Agent)</h2>
             <ul>
-                <li><strong>Human-Directed / Decided:</strong> Provided the initial problem specifications, unzipped starter package, and gave the prompt instructions and proceed signals.</li>
-                <li><strong>Agent-Generated / Executed (100% Autonomous):</strong>
+                <li><strong>Human-Directed / Decided:</strong> 
                     <ul>
-                        <li>Researched the starter code end-to-end to identify architectural flaws.</li>
-                        <li>Implemented an optimized BPE training pipeline (with tuple membership-check shortcuts running in seconds).</li>
-                        <li>Refined the PyTorch network architecture to support Rotary Embeddings, LayerNorm weight tying, and parameter capacity scaling.</li>
-                        <li>Wrote clean training scripts containing linear-warmup/cosine decay scheduling and gradient clipping.</li>
-                        <li>Conducted 8 systematic, controlled experiment runs, diagnosed regressions, and documented the results.</li>
-                        <li>Coded and verified the final deliverables conforming to strict code style rules (zero comments in source files).</li>
+                        <li>Approved BPE, weight tying, warmup schedules, and RoPE.</li>
+                        <li>Designed the linguistically motivated **Devanagari Merge Priority BPE** rules in `tokenizer.py` to boost Hindi character representations.</li>
+                        <li>Ran and evaluated the Devanagari BPE priority feature across sequence length variations.</li>
+                    </ul>
+                </li>
+                <li><strong>Agent-Generated / Executed:</strong>
+                    <ul>
+                        <li>Researched model.py and implemented Rotary Position Embeddings, weight tying, LayerNorm, and optimizer configurations.</li>
+                        <li>Implemented the baseline BPE training loop and final code cleanup conforming to comment-free styling rules.</li>
+                        <li>Generated the HTML dashboard, runlog documents, and notes summaries.</li>
                     </ul>
                 </li>
             </ul>

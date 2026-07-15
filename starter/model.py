@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class Config:
     vocab_size = 256
-    block_size = 128
+    block_size = 256
     n_layer = 4
     n_head = 6
     n_embd = 192
